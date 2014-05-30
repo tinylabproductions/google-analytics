@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -44,7 +45,9 @@ namespace com.tinylabproductions.GoogleAnalytics {
     private readonly IDictionary<IMetric, uint> customMetrics;
     private readonly IDictionary<IDimension, uint> customDimensions;
     private readonly string screenResolution;
+#if UNITY_EDITOR
     private readonly List<WWW> wwws = new List<WWW>();
+#endif
 
     /**
      * [param trackingId] Tracking ID / Web property / Property ID.
@@ -53,15 +56,11 @@ namespace com.tinylabproductions.GoogleAnalytics {
      **/
     public Client(
       string trackingId, string clientId, 
-      string appName, string appVersion
-      //IDictionary<IMetric, uint> customMetrics = null,
-      //IDictionary<IDimension, uint> customDimensions = null,
-      //string url = DEFAULT_URL
+      string appName, string appVersion,
+      IDictionary<IMetric, uint> customMetrics = null,
+      IDictionary<IDimension, uint> customDimensions = null,
+      string url = DEFAULT_URL
     ) {
-	  
-      IDictionary<IMetric, uint> customMetrics = null;
-      IDictionary<IDimension, uint> customDimensions = null;
-      string url = DEFAULT_URL;
       appName.checkLength("appName", 100);
       appVersion.checkLength("appVersion", 100);
 
@@ -210,7 +209,9 @@ namespace com.tinylabproductions.GoogleAnalytics {
       );
 #endif
       var www = new WWW(url, form);
+#if UNITY_EDITOR
       wwws.Add(www);
+#endif
     }
 
 #if UNITY_EDITOR
