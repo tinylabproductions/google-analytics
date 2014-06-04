@@ -17,6 +17,10 @@ notif() {
   read
 }
 
+ctx() {
+  echo $(dirname $name) | sed -E -e "s|[^/]+|..|g"
+}
+
 dirlink() {
   name="$1"
   mkdir -p `dirname $name`
@@ -39,7 +43,7 @@ dirlink() {
       rm -rfv "$name"
     fi
 
-    ctx=$(echo $(dirname $name) | sed -E -e "s|[^/]+|..|g")
+    ctx=$(ctx "$name")
     ln -s "$ctx/$ld/$name" "$name"
   fi
 }
@@ -52,8 +56,8 @@ filelink() {
   if [[ "$OS" == *Windows* ]]; then
     fsutil hardlink create "$name" "$ld/$name"
   else
-    ctx=$(echo $(dirname $name) | sed -e "s|[^/]\+|..|g")
-    echo ln -s "$ctx/$ld/$name" "$name"
+    ctx=$(ctx $(dirname "$name"))
+    ln -f "$ld/$name" "$name"
   fi
 }
 
