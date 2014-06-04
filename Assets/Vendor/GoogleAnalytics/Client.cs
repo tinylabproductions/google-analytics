@@ -39,8 +39,8 @@ namespace com.tinylabproductions.GoogleAnalytics {
 
     private readonly string trackingId;
     private readonly string clientId;
-    private readonly string appName;
-    private readonly string appVersion;
+    public readonly string appName;
+    public readonly string appVersion;
     private readonly string url;
     private readonly IDictionary<IMetric, uint> customMetrics;
     private readonly IDictionary<IDimension, uint> customDimensions;
