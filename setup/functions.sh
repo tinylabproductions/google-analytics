@@ -20,7 +20,7 @@ notif() {
 dirlink() {
   name="$1"
   mkdir -p `dirname $name`
-  
+
   if [[ "$OS" == *Windows* ]]; then
     junction -d "$name"
     # Really nice: process exits defore it has finished.
@@ -33,13 +33,13 @@ dirlink() {
 
     junction "$name" "$ld/$name"
   else
-    test -e "$name" && {
+    if [ -e "$name" -o -h "$name" ]; then
       ls -la "$name"
       notif "Going to remove '$name'"
       rm -rfv "$name"
-    }
+    fi
 
-    ctx=`echo $name | sed -e "s|[^/]\+|..|g"`
+    ctx=$(echo $(dirname $name) | sed -E -e "s|[^/]+|..|g")
     ln -s "$ctx/$ld/$name" "$name"
   fi
 }
@@ -48,7 +48,7 @@ filelink() {
   name="$1"
   mkdir -p `dirname $name`
   test -e "$name" && rm -rfv "$name"
-  
+
   if [[ "$OS" == *Windows* ]]; then
     fsutil hardlink create "$name" "$ld/$name"
   else
