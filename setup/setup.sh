@@ -9,4 +9,6 @@ echo "Setting up $name."
 
 dirlink Assets/Vendor/GoogleAnalytics
 
+setup_gitignore
+
 echo "Done with $name."
