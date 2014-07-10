@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
@@ -45,6 +46,8 @@ namespace com.tinylabproductions.GoogleAnalytics {
     private readonly IDictionary<IMetric, uint> customMetrics;
     private readonly IDictionary<IDimension, uint> customDimensions;
     private readonly string screenResolution;
+    private readonly string userAgent;
+    private readonly Dictionary<string,string> headers;
 #if UNITY_EDITOR
     private readonly List<WWW> wwws = new List<WWW>();
 #endif
@@ -74,6 +77,22 @@ namespace com.tinylabproductions.GoogleAnalytics {
 
       screenResolution = 
         string.Format("{0}x{1}", Screen.width, Screen.height);
+
+#if UNITY_IPHONE
+      var os = SystemInfo.operatingSystem;
+      var lowos = os.Replace(".", "_");
+      var model = SystemInfo.deviceModel;
+
+      if (model.StartsWith("iPhone")) model = "iPhone";
+      else if (model.StartsWith("iPad")) model = "iPad";
+      else if (model.StartsWith("iPod")) model = "iPod";
+
+      userAgent = "Mozilla/5.0 (" + model + "; U; cpu " + lowos +
+        " like Mac OS X) AppleWebKit/534.46.0 (KHTML, like Gecko) CriOS/19.0.1084.60 Mobile/9B206 Safari/7534.48.3";
+
+      headers = new Dictionary<string, string>();
+      headers.Add("User-Agent", userAgent);
+ #endif
     }
 
     /** 
@@ -208,7 +227,11 @@ namespace com.tinylabproductions.GoogleAnalytics {
         "\n\n" + debugCurrentWwws()
       );
 #endif
+#if !UNITY_IPHONE
       var www = new WWW(url, form);
+#else
+      var www = new WWW(url, form.data, headers);
+#endif
 #if UNITY_EDITOR
       wwws.Add(www);
 #endif
