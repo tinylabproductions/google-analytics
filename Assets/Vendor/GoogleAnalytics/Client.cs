@@ -5,7 +5,47 @@ using UnityEngine;
 using Random = UnityEngine.Random;
 
 namespace com.tinylabproductions.GoogleAnalytics {
-  public class Client {
+  public interface Client {
+    /** 
+     * Starts a user session that you can see under sessions tab.
+     * 
+     * You can still call other methods without a session.
+     **/
+    void SessionStart();
+
+    /** Ends a user session. **/
+    void SessionEnd();
+
+    /** Posts an event. **/
+    void Event(
+      string category = null, string action = null, string label = null, 
+      int? value = null, 
+      IDictionary<IMetric, uint> metricValues=null,
+      IDictionary<IDimension, string> dimensionValues=null
+    );
+
+    /** Registers an app view that you can see under screens tab. **/
+    void AppView(string screenName);
+
+    /**
+     * Registers an item purchase.
+     * 
+     * [param name]  Required. Specifies the item name.
+     * [param price] Specifies the price for a single item / unit.
+     * [param quantity] Specifies the number of items purchased.
+     * [param code] Specifies the SKU or item code.
+     * [param category] Specifies the category that the item belongs to.
+     * [param currencyCode] When present indicates the local currency for all 
+     *                      transaction currency values. Value should be a valid
+     *                      ISO 4217 currency code.
+     **/
+    void Item(
+      string name, float? price=null, int? quantity=null, string code=null, 
+      string category=null, string currencyCode=null
+    );
+  }
+
+  public class ClientImpl : Client {
     /**
      * Returns pseudo-random client id. In reality it shouldn't collide 
      * unless you have millions of users.
@@ -39,8 +79,8 @@ namespace com.tinylabproductions.GoogleAnalytics {
 
     private readonly string trackingId;
     private readonly string clientId;
-    public readonly string appName;
-    public readonly string appVersion;
+    private readonly string appName;
+    private readonly string appVersion;
     private readonly string url;
     private readonly IDictionary<IMetric, uint> customMetrics;
     private readonly IDictionary<IDimension, uint> customDimensions;
@@ -54,7 +94,7 @@ namespace com.tinylabproductions.GoogleAnalytics {
      * [param clientId] Anonymous Client ID.
      * [param customMetrics] metric to metric id mapping.
      **/
-    public Client(
+    public ClientImpl(
       string trackingId, string clientId, 
       string appName, string appVersion,
       IDictionary<IMetric, uint> customMetrics = null,
@@ -76,25 +116,18 @@ namespace com.tinylabproductions.GoogleAnalytics {
         string.Format("{0}x{1}", Screen.width, Screen.height);
     }
 
-    /** 
-     * Starts a user session that you can see under sessions tab.
-     * 
-     * You can still call other methods without a session.
-     **/
     public void SessionStart() {
       var form = createForm();
       form.AddField("sc", "start");
       post(form);
     }
-
-    /** Ends a user session. **/
+    
     public void SessionEnd() {
       var form = createForm();
       form.AddField("sc", "end");
       post(form);
     }
 
-    /** Posts an event. **/
     public void Event(
       string category = null, string action = null, string label = null, 
       int? value = null, 
@@ -117,7 +150,6 @@ namespace com.tinylabproductions.GoogleAnalytics {
       post(form);
     }
 
-    /** Registers an app view that you can see under screens tab. **/
     public void AppView(string screenName) {
       var form = createForm();
       form.AddField("t", "appview"); // Hit type
@@ -125,18 +157,6 @@ namespace com.tinylabproductions.GoogleAnalytics {
       post(form);
     }
 
-    /**
-     * Registers an item purchase.
-     * 
-     * [param name]  Required. Specifies the item name.
-     * [param price] Specifies the price for a single item / unit.
-     * [param quantity] Specifies the number of items purchased.
-     * [param code] Specifies the SKU or item code.
-     * [param category] Specifies the category that the item belongs to.
-     * [param currencyCode] When present indicates the local currency for all 
-     *                      transaction currency values. Value should be a valid
-     *                      ISO 4217 currency code.
-     **/
     public void Item(
       string name, float? price=null, int? quantity=null, string code=null, 
       string category=null, string currencyCode=null
@@ -237,5 +257,13 @@ namespace com.tinylabproductions.GoogleAnalytics {
       return msg + "\n\n=== end ===";
     }
 #endif
+  }
+
+  public class ClientNoOpImpl : Client {
+    public void SessionStart() {}
+    public void SessionEnd() {}
+    public void Event(string category = null, string action = null, string label = null, int? value = null, IDictionary<IMetric, uint> metricValues = null, IDictionary<IDimension, string> dimensionValues = null) {}
+    public void AppView(string screenName) {}
+    public void Item(string name, float? price = null, int? quantity = null, string code = null, string category = null, string currencyCode = null) {}
   }
 }
