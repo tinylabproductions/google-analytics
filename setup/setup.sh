@@ -2,13 +2,20 @@
 
 set -e
 
-source "`dirname $0`/functions.sh"
-name="Google Analytics"
+thisdir="$(dirname "$0")"
+source "$thisdir/functions.sh"
 
-echo "Setting up $name."
+echo "Setting up $thisdir"
 
-dirlink Assets/Vendor/GoogleAnalytics
+for f in $(find "$thisdir/../parts/" -name setup.sh -mindepth 2 -maxdepth 2); do
+  libsrc="$(dirname $f)"
+  echo
+  echo "############ BEGIN: $f"
+  source $f
+  echo "############ DONE: $f"
+  echo
+done
 
 setup_gitignore
 
-echo "Done with $name."
+echo "Done with $thisdir"

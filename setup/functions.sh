@@ -1,7 +1,8 @@
 # MyDir - directory where this script is.
 md=`dirname $0`
-# LibDir - directory for library root.
-ld=`dirname $md`
+
+# This should be filled in by setup.sh
+libsrc=""
 
 # Convert / to \.
 wname() { echo $@ | sed -e "s|/|\\\\|g"; }
@@ -78,24 +79,6 @@ END {
   mv -f "$gi_gen" "$gi"
 }
 
-# arg 1 - directory containing subfolders to merge
-# arg 2 - target directory
-mergedir() {
-  local source="$ld/$1"
-  local target="$ld/$2"
-
-  echo "Merging $source to $target."
-
-  mkdir -p "$target"
-  for f in $(ls -1 "$source"); do
-    local src="$source/$f"
-    echo "$src"
-    cp -a "$src"/* "$target/"
-  done
-
-  echo "Done merging $source to $target."
-}
-
 dirlink() {
   local name="$1"
   mkdir -p `dirname $name`
@@ -109,7 +92,7 @@ dirlink() {
     }
 
     if [ "$opt_clean" != "1" ]; then
-      while [ -n "$(junction "$name" "$ld/$name" | grep "Error opening")" ]; do
+      while [ -n "$(junction "$name" "$libsrc/$name" | grep "Error opening")" ]; do
         echo "Directory $name is locked. Retrying in 1 second."
         sleep 1
         junction -d "$name"
@@ -124,7 +107,7 @@ dirlink() {
 
     if [ "$opt_clean" != "1" ]; then
       ctx=$(ctx "$name")
-      ln -s "$ctx/$ld/$name" "$name"
+      ln -s "$ctx/$libsrc/$name" "$name"
     fi
   fi
 
@@ -134,8 +117,8 @@ dirlink() {
 # Recursive dir link - find all dirs in given name and link them.
 rdirlink() {
   local name="$1"
-  for f in $(find "$ld/$name" -type d -mindepth 1 -maxdepth 1 | xargs); do
-    local tname=`echo $f | sed -e "s|$ld/||"`
+  for f in $(find "$libsrc/$name" -type d -mindepth 1 -maxdepth 1 | xargs); do
+    local tname=`echo $f | sed -e "s|$libsrc/||"`
     dirlink "$tname"
   done
 }
@@ -147,10 +130,10 @@ filelink() {
 
   if [[ "$opt_clean" != "1" ]]; then
     if [[ "$OS" == *Windows* ]]; then
-      fsutil hardlink create "$name" "$ld/$name"
+      fsutil hardlink create "$name" "$libsrc/$name"
     else
       local ctx=$(ctx $(dirname "$name"))
-      ln -f "$ld/$name" "$name"
+      ln -f "$libsrc/$name" "$name"
     fi
   fi
 
@@ -160,8 +143,8 @@ filelink() {
 # Recursive file link - find all files in given name and link them.
 rfilelink() {
   local name="$1"
-  for f in $(find "$ld/$name" -type f | xargs); do
-    local tname=`echo $f | sed -e "s|$ld/||"`
+  for f in $(find "$libsrc/$name" -type f | xargs); do
+    local tname=`echo $f | sed -e "s|$libsrc/||"`
     filelink "$tname"
   done
 }
@@ -172,5 +155,3 @@ for arg in "$@"; do
     opt_clean=1
   fi
 done
-
-mergedir parts Assets
