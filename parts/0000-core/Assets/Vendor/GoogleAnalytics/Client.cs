@@ -237,16 +237,13 @@ namespace com.tinylabproductions.GoogleAnalytics {
     }
 
     private void post(WWWForm form) {
-      // Cleanup complete wwws.
-      //wwws.RemoveAll(w => w.isDone);
-
-#if UNITY_EDITOR
-      Debug.Log(
+      if (Application.isEditor || Debug.isDebugBuild) Debug.Log(
         "Posting to Google Analytics: " + 
-        Encoding.UTF8.GetString(form.data) +
-        "\n\n" + debugCurrentWwws()
-      );
+        Encoding.UTF8.GetString(form.data) 
+#if UNITY_EDITOR
+        + "\n\n" + debugCurrentWwws()
 #endif
+      );
 #if !UNITY_IPHONE
       var www = new WWW(url, form);
 #else
