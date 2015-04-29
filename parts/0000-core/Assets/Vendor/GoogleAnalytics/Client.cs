@@ -240,7 +240,7 @@ namespace com.tinylabproductions.GoogleAnalytics {
       if (Application.isEditor || Debug.isDebugBuild) Debug.Log(
         "Posting to Google Analytics: " + 
         Encoding.UTF8.GetString(form.data) 
-#if UNITY_EDITOR
+#if UNITY_EDITOR && false
         + "\n\n" + debugCurrentWwws()
 #endif
       );
@@ -249,7 +249,7 @@ namespace com.tinylabproductions.GoogleAnalytics {
 #else
       var www = new WWW(url, form.data, headers);
 #endif
-#if UNITY_EDITOR
+#if UNITY_EDITOR && false
       wwws.Add(www);
 #endif
     }
