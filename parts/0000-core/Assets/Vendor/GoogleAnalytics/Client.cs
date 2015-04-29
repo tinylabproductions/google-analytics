@@ -88,6 +88,7 @@ namespace com.tinylabproductions.GoogleAnalytics {
     private readonly string screenResolution;
     private readonly string userAgent;
     private readonly Dictionary<string,string> headers;
+    string screenName = "Not Set";
 #if UNITY_EDITOR
     private readonly List<WWW> wwws = new List<WWW>();
 #endif
@@ -170,9 +171,9 @@ namespace com.tinylabproductions.GoogleAnalytics {
     }
 
     public void AppView(string screenName) {
+      this.screenName = screenName;
       var form = createForm();
       form.AddField("t", "appview"); // Hit type
-      form.add("screenName", screenName, "cd", 1500);
       post(form);
     }
 
@@ -233,6 +234,7 @@ namespace com.tinylabproductions.GoogleAnalytics {
       f.AddField("an", appName);
       f.AddField("av", appVersion);
       f.AddField("sr", screenResolution);
+      f.add("screenName", screenName, "cd", 1500);
       return f;
     }
 
