@@ -67,12 +67,7 @@ namespace com.tinylabproductions.GoogleAnalytics {
      * And then use it in Client constructor.
      **/
     public static string randomClientId { get {
-      var parts = new string[5];
-      for (var idx = 0; idx < parts.Length; idx++)
-        parts[idx] = Convert.ToString(Mathf.RoundToInt(
-          Random.value * Random.value * Random.value * 1000000
-        ), 16);
-      return string.Join("-", parts);
+      return Guid.NewGuid().ToString();
     } }
 
     public const string DEFAULT_URL = 
