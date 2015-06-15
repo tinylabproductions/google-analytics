@@ -229,7 +229,7 @@ namespace com.tinylabproductions.GoogleAnalytics {
       f.AddField("an", appName);
       f.AddField("av", appVersion);
       f.AddField("sr", screenResolution);
-      f.add("screenName", screenName, "cd", 1500);
+      f.add("screenName", screenName, "cd", 2048);
       return f;
     }
 
