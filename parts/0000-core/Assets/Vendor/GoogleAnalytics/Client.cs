@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
+using com.tinylabproductions.TLPLib.Concurrent;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -244,7 +245,7 @@ namespace com.tinylabproductions.GoogleAnalytics {
 #if !UNITY_IPHONE
       var www = new WWW(url, form);
 #else
-      var www = new WWW(url, form.data, headers);
+      ASync.queryWWW(() => new WWW(url, form.data, headers));
 #endif
 #if UNITY_EDITOR && false
       wwws.Add(www);
