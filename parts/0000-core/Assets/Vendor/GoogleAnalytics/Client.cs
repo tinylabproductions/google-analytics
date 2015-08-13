@@ -243,7 +243,7 @@ namespace com.tinylabproductions.GoogleAnalytics {
 #endif
       );
 #if !UNITY_IPHONE
-      var www = new WWW(url, form);
+      new WWW(url, form);
 #else
       // This is used because of il2cpp bug
       ASync.queryWWW(() => new WWW(url, form.data, headers));
