@@ -245,8 +245,9 @@ namespace com.tinylabproductions.GoogleAnalytics {
 #if !UNITY_IPHONE
       new WWW(url, form);
 #else
-      // This is used because of il2cpp bug
-      ASync.queryWWW(() => new WWW(url, form.data, headers));
+      // This is used because of il2cpp bug which crashes the runtime
+      // if several wwws are running at the same time.
+      ASync.oneAtATimeWWW(() => new WWW(url, form.data, headers));
 #endif
 #if UNITY_EDITOR && false
       wwws.Add(www);
