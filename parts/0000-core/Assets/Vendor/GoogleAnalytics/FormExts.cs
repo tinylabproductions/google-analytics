@@ -17,7 +17,7 @@ namespace com.tinylabproductions.GoogleAnalytics {
     ) {
       if (maxLength != 0 && value.Length > maxLength)
         throw new ArgumentException(string.Format(
-          "length cannot exceed {0} bytes!", maxLength
+          $"length cannot exceed {maxLength} bytes, but it was {value.Length} bytes: {value}"
         ), argName);
     }
   }
