@@ -48,6 +48,10 @@ namespace com.tinylabproductions.GoogleAnalytics {
   }
 
   public class ClientImpl : Client {
+    public const int 
+      MAX_CATEGORY_LENGTH = 150, MAX_ACTION_LENGTH = 500, 
+      MAX_LABEL_LENGTH = 500;
+
     /**
      * Returns pseudo-random client id. In reality it shouldn't collide 
      * unless you have millions of users.
@@ -155,9 +159,9 @@ namespace com.tinylabproductions.GoogleAnalytics {
 
       var form = createForm();
       form.AddField("t", "event"); // Hit type
-      form.add("category", category, "ec", 150);
-      form.add("action", action, "ea", 500);
-      form.add("label", label, "el", 500);
+      form.add("category", category, "ec", MAX_CATEGORY_LENGTH);
+      form.add("action", action, "ea", MAX_ACTION_LENGTH);
+      form.add("label", label, "el", MAX_LABEL_LENGTH);
       if (value != null)
         form.add("value", value.ToString(), "ev");
       addMetrics(form, metricValues);
