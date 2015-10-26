@@ -8,8 +8,7 @@ namespace com.tinylabproductions.GoogleAnalytics {
       int maxLength = 0
     ) {
       if (value == null) return;
-      value.checkLength(argName, maxLength);
-      form.AddField(googleName, value);
+      form.AddField(googleName, fixLength(value, maxLength));
     }
 
     internal static void checkLength(
@@ -19,6 +18,11 @@ namespace com.tinylabproductions.GoogleAnalytics {
         throw new ArgumentException(string.Format(
           $"length cannot exceed {maxLength} bytes, but it was {value.Length} bytes: {value}"
         ), argName);
+    }
+
+    static string fixLength(string value, int maxLength) {
+      if (value.Length <= maxLength) return value;
+      return value.Substring(0, maxLength);
     }
   }
 }
