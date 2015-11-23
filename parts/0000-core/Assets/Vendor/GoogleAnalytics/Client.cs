@@ -4,20 +4,8 @@ using System.Collections.Generic;
 using System.Text;
 using com.tinylabproductions.TLPLib.Concurrent;
 using UnityEngine;
-using Random = UnityEngine.Random;
-
 namespace com.tinylabproductions.GoogleAnalytics {
   public interface Client {
-    /** 
-     * Starts a user session that you can see under sessions tab.
-     * 
-     * You can still call other methods without a session.
-     **/
-    void SessionStart();
-
-    /** Ends a user session. **/
-    void SessionEnd();
-
     /** Posts an event. **/
     void Event(
       string category = null, string action = null, string label = null, 
