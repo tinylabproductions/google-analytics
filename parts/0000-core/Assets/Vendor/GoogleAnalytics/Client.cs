@@ -1,9 +1,8 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Text;
-using com.tinylabproductions.TLPLib.Concurrent;
 using UnityEngine;
+
 namespace com.tinylabproductions.GoogleAnalytics {
   public interface Client {
     /** Posts an event. **/
@@ -272,6 +271,9 @@ namespace com.tinylabproductions.GoogleAnalytics {
   }
 
   public class ClientNoOpImpl : Client {
+    public static readonly ClientNoOpImpl instance = new ClientNoOpImpl();
+    ClientNoOpImpl() { }
+
     public void SessionStart() {}
     public void SessionEnd() {}
     public void Event(string category = null, string action = null, string label = null, int? value = null, IDictionary<IMetric, uint> metricValues = null, IDictionary<IDimension, string> dimensionValues = null) {}
