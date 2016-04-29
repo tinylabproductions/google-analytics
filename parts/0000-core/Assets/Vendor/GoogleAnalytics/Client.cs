@@ -65,20 +65,14 @@ namespace com.tinylabproductions.GoogleAnalytics {
     public const string DEFAULT_URL = 
       "http://www.google-analytics.com/collect";
 
-    private readonly string trackingId;
-    private readonly string clientId;
-    private readonly string appName;
-    private readonly string appVersion;
-    private readonly string url;
-    private readonly IDictionary<IMetric, uint> customMetrics;
-    private readonly IDictionary<IDimension, uint> customDimensions;
-    private readonly string screenResolution;
-    private readonly string userAgent;
-    private readonly Dictionary<string,string> headers;
-    string screenName = "Not Set";
-#if UNITY_EDITOR
-    private readonly List<WWW> wwws = new List<WWW>();
+    readonly ICollection<string> trackingIds;
+    readonly string clientId, appName, appVersion, url, screenResolution;
+    readonly IDictionary<IMetric, uint> customMetrics;
+    readonly IDictionary<IDimension, uint> customDimensions;
+#if UNITY_IPHONE
+    readonly Dictionary<string,string> headers;
 #endif
+    string screenName = "Not Set";
 
     /**
      * [param trackingId] Tracking ID / Web property / Property ID.
@@ -86,7 +80,7 @@ namespace com.tinylabproductions.GoogleAnalytics {
      * [param customMetrics] metric to metric id mapping.
      **/
     public ClientImpl(
-      string trackingId, string clientId, 
+      ICollection<string> trackingIds, string clientId, 
       string appName, string appVersion,
       IDictionary<IMetric, uint> customMetrics = null,
       IDictionary<IDimension, uint> customDimensions = null,
@@ -95,7 +89,7 @@ namespace com.tinylabproductions.GoogleAnalytics {
       appName.checkLength("appName", 100);
       appVersion.checkLength("appVersion", 100);
 
-      this.trackingId = trackingId;
+      this.trackingIds = trackingIds;
       this.clientId = clientId;
       this.appName = appName;
       this.appVersion = appVersion;
@@ -103,8 +97,7 @@ namespace com.tinylabproductions.GoogleAnalytics {
       this.customDimensions = customDimensions;
       this.url = url;
 
-      screenResolution = 
-        string.Format("{0}x{1}", Screen.width, Screen.height);
+      screenResolution = $"{Screen.width}x{Screen.height}";
 
 #if UNITY_IPHONE
       var os = SystemInfo.operatingSystem;
@@ -115,23 +108,21 @@ namespace com.tinylabproductions.GoogleAnalytics {
       else if (model.StartsWith("iPad")) model = "iPad";
       else if (model.StartsWith("iPod")) model = "iPod";
 
-      userAgent = "Mozilla/5.0 (" + model + "; U; cpu " + lowos +
-        " like Mac OS X) AppleWebKit/534.46.0 (KHTML, like Gecko) CriOS/19.0.1084.60 Mobile/9B206 Safari/7534.48.3";
+      var userAgent = $"Mozilla/5.0 ({model}; U; cpu {lowos} like Mac OS X) AppleWebKit/534.46.0 (KHTML, like Gecko) CriOS/19.0.1084.60 Mobile/9B206 Safari/7534.48.3";
 
-      headers = new Dictionary<string, string>();
-      headers.Add("User-Agent", userAgent);
- #endif
+      headers = new Dictionary<string, string> {{"User-Agent", userAgent}};
+#endif
     }
 
     public void SessionStart() {
       var form = createForm();
-      form.AddField("sc", "start");
+      form.Add("sc", "start");
       post(form);
     }
     
     public void SessionEnd() {
       var form = createForm();
-      form.AddField("sc", "end");
+      form.Add("sc", "end");
       post(form);
     }
 
@@ -145,12 +136,11 @@ namespace com.tinylabproductions.GoogleAnalytics {
         throw new ArgumentException("All parameters cannot be null!");
 
       var form = createForm();
-      form.AddField("t", "event"); // Hit type
-      form.add("category", category, "ec", MAX_CATEGORY_LENGTH);
-      form.add("action", action, "ea", MAX_ACTION_LENGTH);
-      form.add("label", label, "el", MAX_LABEL_LENGTH);
-      if (value != null)
-        form.add("value", value.ToString(), "ev");
+      form.Add("t", "event"); // Hit type
+      form.add("ec", category, MAX_CATEGORY_LENGTH);
+      form.add("ea", action, MAX_ACTION_LENGTH);
+      form.add("el", label, MAX_LABEL_LENGTH);
+      if (value != null) form.add("ev", value.ToString());
       addMetrics(form, metricValues);
       addDimensions(form, dimensionValues);
 
@@ -160,7 +150,7 @@ namespace com.tinylabproductions.GoogleAnalytics {
     public void AppView(string screenName) {
       this.screenName = screenName;
       var form = createForm();
-      form.AddField("t", "appview"); // Hit type
+      form.Add("t", "appview"); // Hit type
       post(form);
     }
 
@@ -168,23 +158,23 @@ namespace com.tinylabproductions.GoogleAnalytics {
       string name, float? price=null, int? quantity=null, string code=null, 
       string category=null, string currencyCode=null
     ) {
-      if (name == null) throw new ArgumentNullException("name");
+      if (name == null) throw new ArgumentNullException(nameof(name));
 
       var form = createForm();
-      form.add("name", name, "in", 500);
-      if (price != null) form.add("price", price.ToString(), "ip");
-      if (quantity != null) form.add("quantity", quantity.ToString(), "iq");
-      form.add("code", code, "ic", 500);
-      form.add("category", category, "iv", 500);
-      form.add("currencyCode", currencyCode, "cu", 10);
+      form.add("in", name, 500);
+      if (price != null) form.add("ip", price.ToString());
+      if (quantity != null) form.add("iq", quantity.ToString());
+      form.add("ic", code, 500);
+      form.add("iv", category, 500);
+      form.add("cu", currencyCode, 10);
       post(form);
     }
 
-    private void addMetrics(WWWForm form, IDictionary<IMetric, uint> values) {
+    void addMetrics(IDictionary<string, string> form, IDictionary<IMetric, uint> values) {
       addCustom("metric", "cm", form, customMetrics, values);
     }
 
-    private void addDimensions(WWWForm form, IDictionary<IDimension, string> values) {
+    void addDimensions(IDictionary<string, string> form, IDictionary<IDimension, string> values) {
       if (values == null) return;
       foreach (var pair in values)
         pair.Value.checkLength("dimension " + pair.Key + " value", 150);
@@ -192,82 +182,56 @@ namespace com.tinylabproductions.GoogleAnalytics {
       addCustom("dimension", "cd", form, customDimensions, values);
     }
 
-    private static void addCustom<Metric, Value>(
-      string name, string googleName, WWWForm form, 
+    static void addCustom<Metric, Value>(
+      string name, string googleName, IDictionary<string, string> form, 
       IDictionary<Metric, uint> indexes, 
       IDictionary<Metric, Value> values
     ) {
       if (values == null) return;
-      if (indexes == null) throw new Exception(string.Format(
-        "You haven't defined any custom {0}s in the constructor!", name
-      ));
+      if (indexes == null)
+        throw new Exception($"You haven't defined any custom {name}s in the constructor!");
 
       foreach (var pair in values) {
         if (! indexes.ContainsKey(pair.Key))
-          throw new ArgumentException(String.Format(
-            "Unregistered {0}: {1} ", name, pair.Key
-          ));
+          throw new ArgumentException($"Unregistered {name}: {pair.Key} ");
 
         var idx = indexes[pair.Key];
-        form.AddField(googleName + idx, pair.Value.ToString());
+        form.Add(googleName + idx, pair.Value.ToString());
       }
     }
 
-    private WWWForm createForm() {
-      var f = new WWWForm();
-      f.AddField("v", 1); // version
-      f.AddField("tid", trackingId);
-      f.AddField("cid", clientId);
-      f.AddField("an", appName);
-      f.AddField("av", appVersion);
-      f.AddField("sr", screenResolution);
-      f.add("screenName", screenName, "cd", 2048);
+    Dictionary<string, string> createForm() {
+      var f = new Dictionary<string, string> {
+        {"v", "1"},
+        {"cid", clientId},
+        {"an", appName},
+        {"av", appVersion},
+        {"sr", screenResolution}
+      };
+      f.add("cd", screenName, 2048);
       return f;
     }
 
-    private void post(WWWForm form) {
-      if (Application.isEditor || Debug.isDebugBuild) Debug.Log(
-        "Posting to Google Analytics: " + 
-        Encoding.UTF8.GetString(form.data) 
-#if UNITY_EDITOR && false
-        + "\n\n" + debugCurrentWwws()
-#endif
-      );
+    void post(Dictionary<string, string> form) {
+      foreach (var trackingId in trackingIds) {
+        var wwwForm = new WWWForm();
+        foreach (var kv in form) wwwForm.AddField(kv.Key, kv.Value);
+        wwwForm.AddField("tid", trackingId);
+
+        if (Application.isEditor || Debug.isDebugBuild) Debug.Log(
+          "Posting to Google Analytics: " + Encoding.UTF8.GetString(wwwForm.data)
+        );
+
 #if !UNITY_IPHONE
-      new WWW(url, form);
+        // ReSharper disable once ObjectCreationAsStatement
+        new WWW(url, wwwForm);
 #else
-      // This is used because of il2cpp bug which crashes the runtime
-      // if several wwws are running at the same time.
-      ASync.oneAtATimeWWW(() => new WWW(url, form.data, headers));
+        // This is used because of il2cpp bug which crashes the runtime
+        // if several wwws are running at the same time.
+        ASync.oneAtATimeWWW(() => new WWW(url, form.data, headers));
 #endif
-#if UNITY_EDITOR && false
-      wwws.Add(www);
-#endif
-    }
-
-#if UNITY_EDITOR
-    private string debugCurrentWwws() {
-      var msg = "=== Executing WWW requests ===\n\n";
-      foreach (var executingWww in wwws) {
-        if (executingWww.isDone) {
-          msg += "Headers:\n";
-          foreach (var pair in executingWww.responseHeaders) {
-            msg += "  " + pair.Key + " = " + pair.Value + "\n";
-          }
-          msg += "\n";
-
-          if (executingWww.error != null)
-            msg += "Error:\n" + executingWww.error;
-          else
-            msg += "Response:\n" + executingWww.text;
-        }
-        else {
-          msg += "Fetching... " + executingWww.progress;
-        }
       }
-      return msg + "\n\n=== end ===";
     }
-#endif
   }
 
   public class ClientNoOpImpl : Client {

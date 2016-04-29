@@ -1,14 +1,13 @@
 ﻿using System;
-using UnityEngine;
+using System.Collections.Generic;
 
 namespace com.tinylabproductions.GoogleAnalytics {
   internal static class FormExts {
     internal static void add(
-      this WWWForm form, string argName, string value, string googleName,
-      int maxLength = 0
+      this Dictionary<string, string> form, string key, string value, int maxLength=-1
     ) {
       if (value == null) return;
-      form.AddField(googleName, fixLength(value, maxLength));
+      form.Add(key, fixLength(value, maxLength));
     }
 
     internal static void checkLength(
@@ -21,6 +20,7 @@ namespace com.tinylabproductions.GoogleAnalytics {
     }
 
     static string fixLength(string value, int maxLength) {
+      if (maxLength < 0) return value;
       if (value.Length <= maxLength) return value;
       return value.Substring(0, maxLength);
     }
