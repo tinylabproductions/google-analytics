@@ -10,36 +10,26 @@ namespace com.tinylabproductions.GoogleAnalytics.Implementations {
       this.dimensions = dimensions;
     }
 
-    public void Event(
-      string category = null, string action = null, string label = null,
-      int? value = null, IDictionary<IMetric, uint> metricValues = null,
-      IDictionary<IDimension, string> dimensionValues = null
-    ) {
-      underlying.Event(
-        category: category, action: action, label: label,
-        value: value, metricValues: metricValues,
-        dimensionValues: add(dimensionValues)
-      );
+    public void Event(GAEvent data) {
+      underlying.Event(new GAEvent(
+        category: data.category, action: data.action, label: data.label,
+        value: data.value, metricValues: data.metricValues,
+        dimensionValues: add(data.dimensionValues)
+      ));
     }
 
-    public void AppView(
-      string screenName,
-      IDictionary<IMetric, uint> metricValues = null,
-      IDictionary<IDimension, string> dimensionValues = null
-    ) {
-      underlying.AppView(screenName, metricValues, add(dimensionValues));
+    public void AppView(GAAppView data) {
+      underlying.AppView(new GAAppView(
+        data.screenName, data.metricValues, add(data.dimensionValues)
+      ));
     }
 
-    public void Item(
-      string name, float? price = null, int? quantity = null,
-      string code = null, string category = null, string currencyCode = null,
-      IDictionary<IMetric, uint> metricValues = null,
-      IDictionary<IDimension, string> dimensionValues = null
-    ) {
-      underlying.Item(
-        name, price, quantity, code, category, currencyCode, metricValues,
-        add(dimensionValues)
-      );
+    public void Item(GAItem data) {
+      underlying.Item(new GAItem(
+        name: data.name, price: data.price, quantity: data.quantity,
+        code: data.code, category: data.category, currencyCode: data.currencyCode,
+        metricValues: data.metricValues, dimensionValues: add(data.dimensionValues)
+      ));
     }
 
     public IGAClient withBaseDimensions(IDictionary<IDimension, string> dimensions) {

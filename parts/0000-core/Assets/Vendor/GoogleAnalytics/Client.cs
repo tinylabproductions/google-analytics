@@ -3,40 +3,92 @@ using System.Collections.Generic;
 using com.tinylabproductions.GoogleAnalytics.Implementations;
 
 namespace com.tinylabproductions.GoogleAnalytics {
+  public struct GAEvent {
+    public readonly string category, action, label;
+    public readonly int? value;
+    public readonly IDictionary<IMetric, uint> metricValues;
+    public readonly IDictionary<IDimension, string> dimensionValues;
+
+    public GAEvent(string category, string action, string label, int? value, IDictionary<IMetric, uint> metricValues, IDictionary<IDimension, string> dimensionValues) {
+      this.category = category;
+      this.action = action;
+      this.label = label;
+      this.value = value;
+      this.metricValues = metricValues;
+      this.dimensionValues = dimensionValues;
+    }
+
+    public override string ToString() { return $"{nameof(GAEvent)}[category: {category}, action: {action}, label: {label}, value: {value}, metricValues: {metricValues}, dimensionValues: {dimensionValues}]"; }
+  }
+
+  public struct GAAppView {
+    public readonly string screenName;
+    public readonly IDictionary<IMetric, uint> metricValues;
+    public readonly IDictionary<IDimension, string> dimensionValues;
+
+    public GAAppView(string screenName, IDictionary<IMetric, uint> metricValues, IDictionary<IDimension, string> dimensionValues) {
+      this.screenName = screenName;
+      this.metricValues = metricValues;
+      this.dimensionValues = dimensionValues;
+    }
+
+    public override string ToString() { return
+        $"{nameof(GAAppView)}[" +
+        $"screenName: {screenName}, " +
+        $"metricValues: {metricValues}, " +
+        $"dimensionValues: {dimensionValues}" +
+        $"]"; }
+  }
+
+  /**
+   * [param name]  Required. Specifies the item name.
+   * [param price] Specifies the price for a single item / unit.
+   * [param quantity] Specifies the number of items purchased.
+   * [param code] Specifies the SKU or item code.
+   * [param category] Specifies the category that the item belongs to.
+   * [param currencyCode] When present indicates the local currency for all
+   *                      transaction currency values. Value should be a valid
+   *                      ISO 4217 currency code.
+   */
+  public struct GAItem {
+    public readonly string name, code, category, currencyCode;
+    public readonly float? price;
+    public readonly int? quantity;
+    public readonly IDictionary<IMetric, uint> metricValues;
+    public readonly IDictionary<IDimension, string> dimensionValues;
+
+    public GAItem(string name, string code, string category, string currencyCode, float? price, int? quantity, IDictionary<IMetric, uint> metricValues, IDictionary<IDimension, string> dimensionValues) {
+      if (name == null) throw new ArgumentNullException(nameof(name));
+      this.name = name;
+      this.code = code;
+      this.category = category;
+      this.currencyCode = currencyCode;
+      this.price = price;
+      this.quantity = quantity;
+      this.metricValues = metricValues;
+      this.dimensionValues = dimensionValues;
+    }
+
+    public override string ToString() {
+      return $"{nameof(GAItem)}[" +
+             $"name: {name}, code: {code}, category: {category}, currencyCode: {currencyCode}, " +
+             $"price: {price}, " +
+             $"quantity: {quantity}, " +
+             $"{nameof(metricValues)}: {metricValues}, " +
+             $"{nameof(dimensionValues)}: {dimensionValues}, " +
+             $"]";
+    }
+  }
+
   public interface IGAClient {
     /** Posts an event. **/
-    void Event(
-      string category = null, string action = null, string label = null,
-      int? value = null,
-      IDictionary<IMetric, uint> metricValues=null,
-      IDictionary<IDimension, string> dimensionValues=null
-    );
+    void Event(GAEvent data);
 
     /** Registers an app view that you can see under screens tab. **/
-    void AppView(
-      string screenName,
-      IDictionary<IMetric, uint> metricValues = null,
-      IDictionary<IDimension, string> dimensionValues = null
-    );
+    void AppView(GAAppView data);
 
-    /**
-     * Registers an item purchase.
-     *
-     * [param name]  Required. Specifies the item name.
-     * [param price] Specifies the price for a single item / unit.
-     * [param quantity] Specifies the number of items purchased.
-     * [param code] Specifies the SKU or item code.
-     * [param category] Specifies the category that the item belongs to.
-     * [param currencyCode] When present indicates the local currency for all
-     *                      transaction currency values. Value should be a valid
-     *                      ISO 4217 currency code.
-     **/
-    void Item(
-      string name, float? price=null, int? quantity=null, string code=null,
-      string category=null, string currencyCode=null,
-      IDictionary<IMetric, uint> metricValues = null,
-      IDictionary<IDimension, string> dimensionValues = null
-    );
+    /** Registers an item purchase. **/
+    void Item(GAItem data);
   }
 
   public static class GAClient {
@@ -72,6 +124,43 @@ namespace com.tinylabproductions.GoogleAnalytics {
       this IGAClient underlying, IDictionary<IDimension, string> dimensions
     ) {
       return new AlwaysIncludedDimensionsWrapper(underlying, dimensions);
+    }
+
+    [Obsolete("Use " + nameof(Event) + "(" + nameof(GAEvent) + ")")]
+    public static void Event(
+      this IGAClient client,
+
+      string category = null, string action = null, string label = null,
+      int? value = null,
+      IDictionary<IMetric, uint> metricValues = null,
+      IDictionary<IDimension, string> dimensionValues = null
+    ) {
+      client.Event(new GAEvent(category, action, label, value, metricValues, dimensionValues));
+    }
+
+    [Obsolete("Use " + nameof(AppView) + "(" + nameof(GAAppView) + ")")]
+    public static void AppView(
+      this IGAClient client,
+
+      string screenName, IDictionary<IMetric, uint> metricValues = null,
+      IDictionary<IDimension, string> dimensionValues = null
+    ) {
+      client.AppView(new GAAppView(screenName, metricValues, dimensionValues));
+    }
+
+    [Obsolete("Use " + nameof(Item) + "(" + nameof(GAItem) + ")")]
+    public static void Item(
+      this IGAClient client,
+
+      string name, float? price = null, int? quantity = null, string code = null,
+      string category = null, string currencyCode = null,
+      IDictionary<IMetric, uint> metricValues = null,
+      IDictionary<IDimension, string> dimensionValues = null
+    ) {
+      client.Item(new GAItem(
+        name: name, price: price, quantity: quantity, code: code, category: category,
+        currencyCode: currencyCode, metricValues: metricValues, dimensionValues: dimensionValues
+      ));
     }
   }
 }

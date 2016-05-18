@@ -7,8 +7,6 @@ namespace com.tinylabproductions.GoogleAnalytics.Implementations {
   public class GAClientImpl : IGAClient {
     readonly ICollection<string> trackingIds;
     readonly string clientId, appName, appVersion, url, screenResolution;
-    readonly IDictionary<IMetric, uint> metricIndexes;
-    readonly IDictionary<IDimension, uint> dimensionIndexes;
     readonly Dictionary<string,string> headers;
     string screenName = "Not Set";
 
@@ -20,8 +18,6 @@ namespace com.tinylabproductions.GoogleAnalytics.Implementations {
     public GAClientImpl(
       ICollection<string> trackingIds, string clientId,
       string appName, string appVersion,
-      IDictionary<IMetric, uint> metricIndexes = null,
-      IDictionary<IDimension, uint> dimensionIndexes = null,
       string url = GAClient.DEFAULT_URL
     ) {
       appName.checkLength("appName", 100);
@@ -31,8 +27,6 @@ namespace com.tinylabproductions.GoogleAnalytics.Implementations {
       this.clientId = clientId;
       this.appName = appName;
       this.appVersion = appVersion;
-      this.metricIndexes = metricIndexes;
-      this.dimensionIndexes = dimensionIndexes;
       this.url = url;
 
       headers = new Dictionary<string, string>();
@@ -52,87 +46,64 @@ namespace com.tinylabproductions.GoogleAnalytics.Implementations {
       }
     }
 
-    public void Event(
-      string category = null, string action = null, string label = null,
-      int? value = null,
-      IDictionary<IMetric, uint> metricValues=null,
-      IDictionary<IDimension, string> dimensionValues=null
-    ) {
-      if (category == null && action == null && label == null && value == null)
+    public void Event(GAEvent d) {
+      if (d.category == null && d.action == null && d.label == null && d.value == null)
         throw new ArgumentException("All parameters cannot be null!");
 
       var form = createForm();
       form.Add("t", "event"); // Hit type
-      form.add("ec", category, GAClient.MAX_CATEGORY_LENGTH);
-      form.add("ea", action, GAClient.MAX_ACTION_LENGTH);
-      form.add("el", label, GAClient.MAX_LABEL_LENGTH);
-      if (value != null) form.add("ev", value.ToString());
-      addMetrics(form, metricValues);
-      addDimensions(form, dimensionValues);
+      form.add("ec", d.category, GAClient.MAX_CATEGORY_LENGTH);
+      form.add("ea", d.action, GAClient.MAX_ACTION_LENGTH);
+      form.add("el", d.label, GAClient.MAX_LABEL_LENGTH);
+      if (d.value != null) form.add("ev", d.value.ToString());
+      addMetrics(form, d.metricValues);
+      addDimensions(form, d.dimensionValues);
 
       post(form);
     }
 
-    public void AppView(
-      string screenName,
-      IDictionary<IMetric, uint> metricValues = null,
-      IDictionary<IDimension, string> dimensionValues = null
-    ) {
-      this.screenName = screenName;
+    public void AppView(GAAppView d) {
+      screenName = d.screenName;
       var form = createForm();
       form.Add("t", "appview"); // Hit type
-      addMetrics(form, metricValues);
-      addDimensions(form, dimensionValues);
+      addMetrics(form, d.metricValues);
+      addDimensions(form, d.dimensionValues);
       post(form);
     }
 
-    public void Item(
-      string name, float? price=null, int? quantity=null, string code=null,
-      string category=null, string currencyCode=null,
-      IDictionary<IMetric, uint> metricValues = null,
-      IDictionary<IDimension, string> dimensionValues = null
-    ) {
-      if (name == null) throw new ArgumentNullException(nameof(name));
-
+    public void Item(GAItem d) {
       var form = createForm();
-      form.add("in", name, 500);
-      if (price != null) form.add("ip", price.ToString());
-      if (quantity != null) form.add("iq", quantity.ToString());
-      form.add("ic", code, 500);
-      form.add("iv", category, 500);
-      form.add("cu", currencyCode, 10);
-      addMetrics(form, metricValues);
-      addDimensions(form, dimensionValues);
+      form.add("in", d.name, 500);
+      if (d.price != null) form.add("ip", d.price.ToString());
+      if (d.quantity != null) form.add("iq", d.quantity.ToString());
+      form.add("ic", d.code, 500);
+      form.add("iv", d.category, 500);
+      form.add("cu", d.currencyCode, 10);
+      addMetrics(form, d.metricValues);
+      addDimensions(form, d.dimensionValues);
       post(form);
     }
 
-    void addMetrics(IDictionary<string, string> form, IDictionary<IMetric, uint> values) {
-      addCustom("metric", "cm", form, metricIndexes, values);
+    static void addMetrics(IDictionary<string, string> form, IDictionary<IMetric, uint> values) {
+      addCustom("cm", form, values);
     }
 
-    void addDimensions(IDictionary<string, string> form, IDictionary<IDimension, string> values) {
+    static void addDimensions(IDictionary<string, string> form, IDictionary<IDimension, string> values) {
       if (values == null) return;
       foreach (var pair in values)
         pair.Value.checkLength("dimension " + pair.Key + " value", 150);
 
-      addCustom("dimension", "cd", form, dimensionIndexes, values);
+      addCustom("cd", form, values);
     }
 
-    static void addCustom<Metric, Value>(
-      string name, string googleName, IDictionary<string, string> form,
-      IDictionary<Metric, uint> indexes,
-      IDictionary<Metric, Value> values
-    ) {
+    static void addCustom<Key, Value>(
+      string googleName, IDictionary<string, string> form,
+      IDictionary<Key, Value> values
+    ) where Key : IIndexed {
       if (values == null) return;
-      if (indexes == null)
-        throw new Exception($"You haven't defined any custom {name}s in the constructor!");
 
       foreach (var pair in values) {
-        if (! indexes.ContainsKey(pair.Key))
-          throw new ArgumentException($"Unregistered {name}: {pair.Key} ");
-
-        var idx = indexes[pair.Key];
-        form.Add(googleName + idx, pair.Value.ToString());
+        form.Add(googleName + pair.Key.index, pair.Value.ToString());
       }
     }
 
