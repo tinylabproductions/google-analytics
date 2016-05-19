@@ -47,9 +47,6 @@ namespace com.tinylabproductions.GoogleAnalytics.Implementations {
     }
 
     public void Event(GAEvent d) {
-      if (d.category == null && d.action == null && d.label == null && d.value == null)
-        throw new ArgumentException("All parameters cannot be null!");
-
       var form = createForm();
       form.Add("t", "event"); // Hit type
       form.add("ec", d.category, GAClient.MAX_CATEGORY_LENGTH);

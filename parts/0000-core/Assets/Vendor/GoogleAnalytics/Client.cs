@@ -9,7 +9,14 @@ namespace com.tinylabproductions.GoogleAnalytics {
     public readonly IDictionary<IMetric, uint> metricValues;
     public readonly IDictionary<IDimension, string> dimensionValues;
 
-    public GAEvent(string category, string action, string label, int? value, IDictionary<IMetric, uint> metricValues, IDictionary<IDimension, string> dimensionValues) {
+    public GAEvent(
+      string category=null, string action=null, string label=null,
+      int? value=null,
+      IDictionary<IMetric, uint> metricValues=null,
+      IDictionary<IDimension, string> dimensionValues=null
+    ) {
+      if (category == null && action == null && label == null && value == null)
+        throw new ArgumentException("All parameters cannot be null!");
       this.category = category;
       this.action = action;
       this.label = label;
