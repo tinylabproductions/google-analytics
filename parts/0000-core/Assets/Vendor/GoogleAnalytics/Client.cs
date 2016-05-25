@@ -33,7 +33,11 @@ namespace com.tinylabproductions.GoogleAnalytics {
     public readonly IDictionary<IMetric, uint> metricValues;
     public readonly IDictionary<IDimension, string> dimensionValues;
 
-    public GAAppView(string screenName, IDictionary<IMetric, uint> metricValues, IDictionary<IDimension, string> dimensionValues) {
+    public GAAppView(
+      string screenName,
+      IDictionary<IMetric, uint> metricValues=null,
+      IDictionary<IDimension, string> dimensionValues=null
+    ) {
       this.screenName = screenName;
       this.metricValues = metricValues;
       this.dimensionValues = dimensionValues;
@@ -64,7 +68,12 @@ namespace com.tinylabproductions.GoogleAnalytics {
     public readonly IDictionary<IMetric, uint> metricValues;
     public readonly IDictionary<IDimension, string> dimensionValues;
 
-    public GAItem(string name, string code, string category, string currencyCode, float? price, int? quantity, IDictionary<IMetric, uint> metricValues, IDictionary<IDimension, string> dimensionValues) {
+    public GAItem(
+      string name, string code=null, string category=null, string currencyCode = null,
+      float? price=null, int? quantity=null,
+      IDictionary<IMetric, uint> metricValues=null,
+      IDictionary<IDimension, string> dimensionValues=null
+    ) {
       if (name == null) throw new ArgumentNullException(nameof(name));
       this.name = name;
       this.code = code;
