@@ -81,6 +81,18 @@ namespace com.tinylabproductions.GoogleAnalytics.Implementations {
       post(form);
     }
 
+    public void Timing(GATiming d) {
+      var form = createForm();
+      form.Add("t", "timing"); // Hit type
+      form.add("utc", d.category, 150);
+      form.add("utv", d.name, 500);
+      form.add("utt", d.time.ToString());
+      if (d.label != null) form.add("utl", d.label, 500);
+      addMetrics(form, d.metricValues);
+      addDimensions(form, d.dimensionValues);
+      post(form);
+    }
+
     static void addMetrics(IDictionary<string, string> form, IDictionary<IMetric, uint> values) {
       addCustom("cm", form, values);
     }

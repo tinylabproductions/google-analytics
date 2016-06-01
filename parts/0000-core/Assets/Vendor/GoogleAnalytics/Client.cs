@@ -96,6 +96,35 @@ namespace com.tinylabproductions.GoogleAnalytics {
     }
   }
 
+  /**
+   * [param category] Required. Specifies the user timing category.
+   * [param name] Required. Specifies the user timing variable.
+   * [param time] Required. Specifies the user timing value. The value is in milliseconds.
+   * [param label] Specifies the user timing label.
+   */
+  public struct GATiming {
+    public readonly string category, name, label;
+    public readonly int time;
+    public readonly IDictionary<IMetric, uint> metricValues;
+    public readonly IDictionary<IDimension, string> dimensionValues;
+
+    public GATiming(
+      string category, string name, int time,
+      string label = null,
+      IDictionary<IMetric, uint> metricValues = null,
+      IDictionary<IDimension, string> dimensionValues = null
+    ) {
+      this.category = category;
+      this.name = name;
+      this.time = time;
+      this.label = label;
+      this.metricValues = metricValues;
+      this.dimensionValues = dimensionValues;
+    }
+
+    public override string ToString() { return $"{nameof(GATiming)}[category: {category}, name: {name}, time: {time}, label: {label}, metricValues: {metricValues}, dimensionValues: {dimensionValues}]"; }
+  }
+
   public interface IGAClient {
     /** Posts an event. **/
     void Event(GAEvent data);
@@ -105,6 +134,9 @@ namespace com.tinylabproductions.GoogleAnalytics {
 
     /** Registers an item purchase. **/
     void Item(GAItem data);
+
+    /** User Timing Tracking. **/
+    void Timing(GATiming timing);
   }
 
   public static class GAClient {

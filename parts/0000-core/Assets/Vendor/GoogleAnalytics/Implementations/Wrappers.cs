@@ -32,6 +32,13 @@ namespace com.tinylabproductions.GoogleAnalytics.Implementations {
       ));
     }
 
+    public void Timing(GATiming data) {
+      underlying.Timing(new GATiming(
+        category: data.category, name: data.name, label: data.label, time: data.time,
+        metricValues: data.metricValues, dimensionValues: add(data.dimensionValues)
+      ));
+    }
+
     public IGAClient withBaseDimensions(IDictionary<IDimension, string> dimensions) {
       return new AlwaysIncludedDimensionsWrapper(this, dimensions);
     }
