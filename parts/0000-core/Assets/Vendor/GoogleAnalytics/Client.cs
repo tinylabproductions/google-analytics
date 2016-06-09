@@ -104,25 +104,25 @@ namespace com.tinylabproductions.GoogleAnalytics {
    */
   public struct GATiming {
     public readonly string category, name, label;
-    public readonly int time;
+    public readonly int timeMs;
     public readonly IDictionary<IMetric, uint> metricValues;
     public readonly IDictionary<IDimension, string> dimensionValues;
 
     public GATiming(
-      string category, string name, int time,
+      string category, string name, int timeMs,
       string label = null,
       IDictionary<IMetric, uint> metricValues = null,
       IDictionary<IDimension, string> dimensionValues = null
     ) {
       this.category = category;
       this.name = name;
-      this.time = time;
+      this.timeMs = timeMs;
       this.label = label;
       this.metricValues = metricValues;
       this.dimensionValues = dimensionValues;
     }
 
-    public override string ToString() { return $"{nameof(GATiming)}[category: {category}, name: {name}, time: {time}, label: {label}, metricValues: {metricValues}, dimensionValues: {dimensionValues}]"; }
+    public override string ToString() { return $"{nameof(GATiming)}[category: {category}, name: {name}, time: {timeMs}, label: {label}, metricValues: {metricValues}, dimensionValues: {dimensionValues}]"; }
   }
 
   public interface IGAClient {

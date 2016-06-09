@@ -86,7 +86,7 @@ namespace com.tinylabproductions.GoogleAnalytics.Implementations {
       form.Add("t", "timing"); // Hit type
       form.add("utc", d.category, 150);
       form.add("utv", d.name, 500);
-      form.add("utt", d.time.ToString());
+      form.add("utt", d.timeMs.ToString());
       if (d.label != null) form.add("utl", d.label, 500);
       addMetrics(form, d.metricValues);
       addDimensions(form, d.dimensionValues);
