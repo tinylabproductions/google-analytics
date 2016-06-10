@@ -136,7 +136,7 @@ namespace com.tinylabproductions.GoogleAnalytics {
     void Item(GAItem data);
 
     /** User Timing Tracking. **/
-    void Timing(GATiming timing);
+    void Timing(GATiming data);
   }
 
   public static class GAClient {
