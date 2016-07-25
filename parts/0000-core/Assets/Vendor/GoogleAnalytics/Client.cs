@@ -215,17 +215,16 @@ namespace com.tinylabproductions.GoogleAnalytics {
       this.campaignId = campaignId;
     }
 
-    public static Try<GAReferrer> fromQueryString(string qs) {
-      return QueryString.parseKV(qs).map(list => {
-        var dict = list.ToDictionary(t => t._1, t => t._2);
-        return new GAReferrer(
-          campaignName: dict.get("utm_campaign"),
-          campaignSource: dict.get("utm_source"),
-          campaignMedium: dict.get("utm_medium"),
-          campaignKeyword: dict.get("utm_term"),
-          campaignContent: dict.get("utm_content")
-        );
-      });
+    public static GAReferrer fromQueryString(string qs) {
+      var list = QueryString.parseKV(qs);
+      var dict = list.ToDictionary(t => t._1, t => t._2);
+      return new GAReferrer(
+        campaignName: dict.get("utm_campaign"),
+        campaignSource: dict.get("utm_source"),
+        campaignMedium: dict.get("utm_medium"),
+        campaignKeyword: dict.get("utm_term"),
+        campaignContent: dict.get("utm_content")
+      );
     }
 
     static void addPart(StringBuilder sb, string name, Option<string> optVal, ref bool first) {
