@@ -1,6 +1,8 @@
 Google Universal Analytics Unity3D client
 =========================================
 
+This library needs TLPLib (https://github.com/tinylabproductions/tlplib) to be in your source tree to compile.
+
 Usage
 -----
 
