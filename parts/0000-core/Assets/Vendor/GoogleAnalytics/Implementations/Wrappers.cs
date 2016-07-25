@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using com.tinylabproductions.TLPLib.Extensions;
+using com.tinylabproductions.TLPLib.Functional;
 
 namespace com.tinylabproductions.GoogleAnalytics.Implementations {
   class AlwaysIncludedDimensionsWrapper : IGAClient {
@@ -39,15 +41,33 @@ namespace com.tinylabproductions.GoogleAnalytics.Implementations {
       ));
     }
 
-    public IGAClient withBaseDimensions(IDictionary<IDimension, string> dimensions) {
-      return new AlwaysIncludedDimensionsWrapper(this, dimensions);
-    }
-
     IDictionary<IDimension, string> add(IDictionary<IDimension, string> dims) {
       if (dims == null) return dimensions;
       var d = new Dictionary<IDimension, string>(dimensions);
       foreach (var kv in dims) d[kv.Key] = kv.Value;
       return d;
     }
+  }
+
+  class DefaultReferrerWrapper : IGAClient {
+    readonly IGAClient underlying;
+    readonly Option<GAReferrer> defaultReferrer;
+
+    public DefaultReferrerWrapper(IGAClient underlying, GAReferrer defaultReferrer) {
+      this.underlying = underlying;
+      this.defaultReferrer = defaultReferrer.some();
+    }
+
+    public void Event(GAEvent data) =>
+      underlying.Event(data.withReferrer(data.referrer || defaultReferrer));
+
+    public void AppView(GAAppView data) =>
+      underlying.AppView(data.withReferrer(data.referrer || defaultReferrer));
+
+    public void Item(GAItem data) =>
+      underlying.Item(data.withReferrer(data.referrer || defaultReferrer));
+
+    public void Timing(GATiming data) =>
+      underlying.Timing(data.withReferrer(data.referrer || defaultReferrer));
   }
 }

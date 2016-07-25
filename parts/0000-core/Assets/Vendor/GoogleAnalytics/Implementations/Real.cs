@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 #if UNITY_IOS
@@ -58,6 +57,7 @@ namespace com.tinylabproductions.GoogleAnalytics.Implementations {
       if (d.value != null) form.add("ev", d.value.ToString());
       addMetrics(form, d.metricValues);
       addDimensions(form, d.dimensionValues);
+      foreach (var referrer in d.referrer) addReferrer(form, referrer);
 
       post(form);
     }
@@ -68,6 +68,7 @@ namespace com.tinylabproductions.GoogleAnalytics.Implementations {
       form.Add("t", "appview"); // Hit type
       addMetrics(form, d.metricValues);
       addDimensions(form, d.dimensionValues);
+      foreach (var referrer in d.referrer) addReferrer(form, referrer);
       post(form);
     }
 
@@ -81,6 +82,7 @@ namespace com.tinylabproductions.GoogleAnalytics.Implementations {
       form.add("cu", d.currencyCode, 10);
       addMetrics(form, d.metricValues);
       addDimensions(form, d.dimensionValues);
+      foreach (var referrer in d.referrer) addReferrer(form, referrer);
       post(form);
     }
 
@@ -93,6 +95,7 @@ namespace com.tinylabproductions.GoogleAnalytics.Implementations {
       if (d.label != null) form.add("utl", d.label, 500);
       addMetrics(form, d.metricValues);
       addDimensions(form, d.dimensionValues);
+      foreach (var referrer in d.referrer) addReferrer(form, referrer);
       post(form);
     }
 
@@ -106,6 +109,16 @@ namespace com.tinylabproductions.GoogleAnalytics.Implementations {
         pair.Value.checkLength("dimension " + pair.Key + " value", 150);
 
       addCustom("cd", form, values);
+    }
+
+    static void addReferrer(IDictionary<string, string> form, GAReferrer referrer) {
+      form.add("dr", referrer.documentReferrer, 2048);
+      form.add("cn", referrer.campaignName, 100);
+      form.add("cs", referrer.campaignSource, 100);
+      form.add("cm", referrer.campaignMedium, 50);
+      form.add("ck", referrer.campaignKeyword, 500);
+      form.add("cc", referrer.campaignContent, 500);
+      form.add("ci", referrer.campaignId, 100);
     }
 
     static void addCustom<Key, Value>(

@@ -1,6 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using com.tinylabproductions.GoogleAnalytics.Implementations;
+using com.tinylabproductions.TLPLib.Extensions;
+using com.tinylabproductions.TLPLib.Functional;
+using com.tinylabproductions.TLPLib.Net;
 
 namespace com.tinylabproductions.GoogleAnalytics {
   public struct GAEvent {
@@ -8,15 +13,19 @@ namespace com.tinylabproductions.GoogleAnalytics {
     public readonly int? value;
     public readonly IDictionary<IMetric, uint> metricValues;
     public readonly IDictionary<IDimension, string> dimensionValues;
+    public readonly Option<GAReferrer> referrer;
 
     public GAEvent(
       string category=null, string action=null, string label=null,
       int? value=null,
       IDictionary<IMetric, uint> metricValues=null,
-      IDictionary<IDimension, string> dimensionValues=null
+      IDictionary<IDimension, string> dimensionValues=null,
+      Option<GAReferrer> referrer=default(Option<GAReferrer>)
     ) {
       if (category == null && action == null && label == null && value == null)
         throw new ArgumentException("All parameters cannot be null!");
+      Option.ensureValue(ref referrer);
+      this.referrer = referrer;
       this.category = category;
       this.action = action;
       this.label = label;
@@ -25,29 +34,49 @@ namespace com.tinylabproductions.GoogleAnalytics {
       this.dimensionValues = dimensionValues;
     }
 
-    public override string ToString() { return $"{nameof(GAEvent)}[category: {category}, action: {action}, label: {label}, value: {value}, metricValues: {metricValues}, dimensionValues: {dimensionValues}]"; }
+    public GAEvent withReferrer(Option<GAReferrer> referrer) =>
+      new GAEvent(category, action, label, value, metricValues, dimensionValues, referrer);
+
+    public override string ToString() => 
+      $"{nameof(GAEvent)}[" +
+      $"category: {category}, " +
+      $"action: {action}, " +
+      $"label: {label}, " +
+      $"value: {value}, " +
+      $"metricValues: {metricValues.asString()}, " +
+      $"dimensionValues: {dimensionValues.asString()}, " +
+      $"{referrer}" +
+      $"]";
   }
 
   public struct GAAppView {
     public readonly string screenName;
     public readonly IDictionary<IMetric, uint> metricValues;
     public readonly IDictionary<IDimension, string> dimensionValues;
+    public readonly Option<GAReferrer> referrer;
 
     public GAAppView(
       string screenName,
       IDictionary<IMetric, uint> metricValues=null,
-      IDictionary<IDimension, string> dimensionValues=null
+      IDictionary<IDimension, string> dimensionValues=null,
+      Option<GAReferrer> referrer=default(Option<GAReferrer>)
     ) {
       this.screenName = screenName;
       this.metricValues = metricValues;
       this.dimensionValues = dimensionValues;
+      Option.ensureValue(ref referrer);
+      this.referrer = referrer;
     }
+
+    public GAAppView withReferrer(Option<GAReferrer> referrer) =>
+      new GAAppView(screenName, metricValues, dimensionValues, referrer);
 
     public override string ToString() { return
         $"{nameof(GAAppView)}[" +
         $"screenName: {screenName}, " +
-        $"metricValues: {metricValues}, " +
-        $"dimensionValues: {dimensionValues}" +
+        $"metricValues: {metricValues.asString()}, " +
+        $"dimensionValues: {dimensionValues.asString()}, " +
+        $"{referrer}" +
         $"]"; }
   }
 
@@ -67,12 +96,14 @@ namespace com.tinylabproductions.GoogleAnalytics {
     public readonly int? quantity;
     public readonly IDictionary<IMetric, uint> metricValues;
     public readonly IDictionary<IDimension, string> dimensionValues;
+    public readonly Option<GAReferrer> referrer;
 
     public GAItem(
       string name, string code=null, string category=null, string currencyCode = null,
       float? price=null, int? quantity=null,
       IDictionary<IMetric, uint> metricValues=null,
-      IDictionary<IDimension, string> dimensionValues=null
+      IDictionary<IDimension, string> dimensionValues=null,
+      Option<GAReferrer> referrer = default(Option<GAReferrer>)
     ) {
       if (name == null) throw new ArgumentNullException(nameof(name));
       this.name = name;
@@ -83,7 +114,13 @@ namespace com.tinylabproductions.GoogleAnalytics {
       this.quantity = quantity;
       this.metricValues = metricValues;
       this.dimensionValues = dimensionValues;
+      Option.ensureValue(ref referrer);
+      this.referrer = referrer;
     }
+
+    public GAItem withReferrer(Option<GAReferrer> referrer) => new GAItem(
+      name, code, category, currencyCode, price, quantity, metricValues, dimensionValues, referrer
+    );
 
     public override string ToString() {
       return $"{nameof(GAItem)}[" +
@@ -92,6 +129,7 @@ namespace com.tinylabproductions.GoogleAnalytics {
              $"quantity: {quantity}, " +
              $"{nameof(metricValues)}: {metricValues}, " +
              $"{nameof(dimensionValues)}: {dimensionValues}, " +
+             $"{referrer}" +
              $"]";
     }
   }
@@ -107,12 +145,14 @@ namespace com.tinylabproductions.GoogleAnalytics {
     public readonly int timeMs;
     public readonly IDictionary<IMetric, uint> metricValues;
     public readonly IDictionary<IDimension, string> dimensionValues;
+    public readonly Option<GAReferrer> referrer;
 
     public GATiming(
       string category, string name, int timeMs,
       string label = null,
       IDictionary<IMetric, uint> metricValues = null,
-      IDictionary<IDimension, string> dimensionValues = null
+      IDictionary<IDimension, string> dimensionValues = null,
+      Option<GAReferrer> referrer = default(Option<GAReferrer>)
     ) {
       this.category = category;
       this.name = name;
@@ -120,9 +160,99 @@ namespace com.tinylabproductions.GoogleAnalytics {
       this.label = label;
       this.metricValues = metricValues;
       this.dimensionValues = dimensionValues;
+      Option.ensureValue(ref referrer);
+      this.referrer = referrer;
     }
 
-    public override string ToString() { return $"{nameof(GATiming)}[category: {category}, name: {name}, time: {timeMs}, label: {label}, metricValues: {metricValues}, dimensionValues: {dimensionValues}]"; }
+    public GATiming withReferrer(Option<GAReferrer> referrer) => new GATiming(
+      category, name, timeMs, label, metricValues, dimensionValues, referrer
+    );
+
+    public override string ToString() => 
+      $"{nameof(GATiming)}[" +
+      $"category: {category}, " +
+      $"name: {name}, " +
+      $"time: {timeMs}, " +
+      $"label: {label}, " +
+      $"metricValues: {metricValues.asString()}, " +
+      $"dimensionValues: {dimensionValues.asString()}, " +
+      $"{referrer}" +
+      $"]";
+  }
+
+  public struct GAReferrer {
+    /**
+     * Specifies which referral source brought traffic to a website. This value is 
+     * also used to compute the traffic source. The format of this value is a URL.
+     **/
+    public readonly Option<string> documentReferrer;
+    public readonly Option<string> 
+      campaignName, campaignSource, campaignMedium, campaignKeyword, 
+      campaignContent, campaignId;
+
+    public GAReferrer(
+      Option<string> documentReferrer = default(Option<string>), 
+      Option<string> campaignName = default(Option<string>), 
+      Option<string> campaignSource = default(Option<string>), 
+      Option<string> campaignMedium = default(Option<string>), 
+      Option<string> campaignKeyword = default(Option<string>), 
+      Option<string> campaignContent = default(Option<string>), 
+      Option<string> campaignId = default(Option<string>)
+    ) {
+      Option.ensureValue(ref documentReferrer);
+      this.documentReferrer = documentReferrer;
+      Option.ensureValue(ref campaignName);
+      this.campaignName = campaignName;
+      Option.ensureValue(ref campaignSource);
+      this.campaignSource = campaignSource;
+      Option.ensureValue(ref campaignMedium);
+      this.campaignMedium = campaignMedium;
+      Option.ensureValue(ref campaignKeyword);
+      this.campaignKeyword = campaignKeyword;
+      Option.ensureValue(ref campaignContent);
+      this.campaignContent = campaignContent;
+      Option.ensureValue(ref campaignId);
+      this.campaignId = campaignId;
+    }
+
+    public static Try<GAReferrer> fromQueryString(string qs) {
+      return QueryString.parseKV(qs).map(list => {
+        var dict = list.ToDictionary(t => t._1, t => t._2);
+        return new GAReferrer(
+          campaignName: dict.get("utm_campaign"),
+          campaignSource: dict.get("utm_source"),
+          campaignMedium: dict.get("utm_medium"),
+          campaignKeyword: dict.get("utm_term"),
+          campaignContent: dict.get("utm_content")
+        );
+      });
+    }
+
+    static void addPart(StringBuilder sb, string name, Option<string> optVal, ref bool first) {
+      foreach (var val in optVal) {
+        if (first) first = false;
+        else sb.Append(", ");
+
+        sb.Append(name);
+        sb.Append(": ");
+        sb.Append(val);
+      }
+    }
+
+    public override string ToString() {
+      var first = true;
+      var sb = new StringBuilder(nameof(GAReferrer));
+      sb.Append('[');
+      addPart(sb, nameof(documentReferrer), documentReferrer, ref first);
+      addPart(sb, nameof(campaignName), campaignName, ref first);
+      addPart(sb, nameof(campaignSource), campaignSource, ref first);
+      addPart(sb, nameof(campaignMedium), campaignMedium, ref first);
+      addPart(sb, nameof(campaignKeyword), campaignKeyword, ref first);
+      addPart(sb, nameof(campaignContent), campaignContent, ref first);
+      addPart(sb, nameof(campaignId), campaignId, ref first);
+      sb.Append(']');
+      return sb.ToString();
+    }
   }
 
   public interface IGAClient {
@@ -170,9 +300,12 @@ namespace com.tinylabproductions.GoogleAnalytics {
     /* Dimensions that are always added to all hits. */
     public static IGAClient withBaseDimensions(
       this IGAClient underlying, IDictionary<IDimension, string> dimensions
-    ) {
-      return new AlwaysIncludedDimensionsWrapper(underlying, dimensions);
-    }
+    ) => new AlwaysIncludedDimensionsWrapper(underlying, dimensions);
+
+    /** Adds specified referrer if no referrer is specified with the hit. */
+    public static IGAClient withDefaultReferrer(
+      this IGAClient underlying, GAReferrer referrer
+    ) => new DefaultReferrerWrapper(underlying, referrer);
 
     [Obsolete("Use " + nameof(Event) + "(" + nameof(GAEvent) + ")")]
     public static void Event(
