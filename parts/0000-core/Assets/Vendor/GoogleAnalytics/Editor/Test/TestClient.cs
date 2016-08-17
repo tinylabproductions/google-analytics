@@ -2,10 +2,10 @@
 
 namespace com.tinylabproductions.GoogleAnalytics {
   public class GATestClient : IGAClient {
-    public List<GAEvent> events = new List<GAEvent>();
-    public List<GAAppView> appViews = new List<GAAppView>();
-    public List<GAItem> items = new List<GAItem>();
-    public List<GATiming> timings = new List<GATiming>();
+    public readonly List<GAEvent> events = new List<GAEvent>();
+    public readonly List<GAAppView> appViews = new List<GAAppView>();
+    public readonly List<GAItem> items = new List<GAItem>();
+    public readonly List<GATiming> timings = new List<GATiming>();
 
     public void clear() {
       events.Clear();
