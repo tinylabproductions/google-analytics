@@ -65,7 +65,7 @@ namespace com.tinylabproductions.GoogleAnalytics.Implementations {
     public void AppView(GAAppView d) {
       screenName = d.screenName;
       var form = createForm();
-      form.Add("t", "appview"); // Hit type
+      form.Add("t", "screenview"); // Hit type
       addMetrics(form, d.metricValues);
       addDimensions(form, d.dimensionValues);
       foreach (var referrer in d.referrer) addReferrer(form, referrer);
