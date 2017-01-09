@@ -181,6 +181,7 @@ namespace com.tinylabproductions.GoogleAnalytics {
   }
 
   public struct GAReferrer {
+    public readonly string raw;
     /**
      * Specifies which referral source brought traffic to a website. This value is 
      * also used to compute the traffic source. The format of this value is a URL.
@@ -191,6 +192,7 @@ namespace com.tinylabproductions.GoogleAnalytics {
       campaignContent, campaignId;
 
     public GAReferrer(
+      string raw,
       Option<string> documentReferrer = default(Option<string>), 
       Option<string> campaignName = default(Option<string>), 
       Option<string> campaignSource = default(Option<string>), 
@@ -199,6 +201,7 @@ namespace com.tinylabproductions.GoogleAnalytics {
       Option<string> campaignContent = default(Option<string>), 
       Option<string> campaignId = default(Option<string>)
     ) {
+      this.raw = raw;
       Option.ensureValue(ref documentReferrer);
       this.documentReferrer = documentReferrer;
       Option.ensureValue(ref campaignName);
@@ -219,6 +222,7 @@ namespace com.tinylabproductions.GoogleAnalytics {
       var list = QueryString.parseKV(qs);
       var dict = list.ToDictionary(t => t._1, t => t._2);
       return new GAReferrer(
+        raw: qs,
         campaignName: dict.get("utm_campaign"),
         campaignSource: dict.get("utm_source"),
         campaignMedium: dict.get("utm_medium"),
@@ -227,11 +231,9 @@ namespace com.tinylabproductions.GoogleAnalytics {
       );
     }
 
-    static void addPart(StringBuilder sb, string name, Option<string> optVal, ref bool first) {
+    static void addPart(StringBuilder sb, string name, Option<string> optVal) {
       foreach (var val in optVal) {
-        if (first) first = false;
-        else sb.Append(", ");
-
+        sb.Append(", ");
         sb.Append(name);
         sb.Append(": ");
         sb.Append(val);
@@ -239,16 +241,16 @@ namespace com.tinylabproductions.GoogleAnalytics {
     }
 
     public override string ToString() {
-      var first = true;
       var sb = new StringBuilder(nameof(GAReferrer));
       sb.Append('[');
-      addPart(sb, nameof(documentReferrer), documentReferrer, ref first);
-      addPart(sb, nameof(campaignName), campaignName, ref first);
-      addPart(sb, nameof(campaignSource), campaignSource, ref first);
-      addPart(sb, nameof(campaignMedium), campaignMedium, ref first);
-      addPart(sb, nameof(campaignKeyword), campaignKeyword, ref first);
-      addPart(sb, nameof(campaignContent), campaignContent, ref first);
-      addPart(sb, nameof(campaignId), campaignId, ref first);
+      sb.Append(raw);
+      addPart(sb, nameof(documentReferrer), documentReferrer);
+      addPart(sb, nameof(campaignName), campaignName);
+      addPart(sb, nameof(campaignSource), campaignSource);
+      addPart(sb, nameof(campaignMedium), campaignMedium);
+      addPart(sb, nameof(campaignKeyword), campaignKeyword);
+      addPart(sb, nameof(campaignContent), campaignContent);
+      addPart(sb, nameof(campaignId), campaignId);
       sb.Append(']');
       return sb.ToString();
     }
