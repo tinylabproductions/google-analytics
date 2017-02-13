@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Text;
+using com.tinylabproductions.TLPLib.Extensions;
 using UnityEngine;
 #if UNITY_IOS
 using com.tinylabproductions.TLPLib.Concurrent;
@@ -39,9 +40,9 @@ namespace com.tinylabproductions.GoogleAnalytics.Implementations {
         var lowos = os.Replace(".", "_");
         var model = SystemInfo.deviceModel;
 
-        if (model.StartsWith("iPhone")) model = "iPhone";
-        else if (model.StartsWith("iPad")) model = "iPad";
-        else if (model.StartsWith("iPod")) model = "iPod";
+        if (model.StartsWithFast("iPhone")) model = "iPhone";
+        else if (model.StartsWithFast("iPad")) model = "iPad";
+        else if (model.StartsWithFast("iPod")) model = "iPod";
 
         var userAgent = $"Mozilla/5.0 ({model}; U; cpu {lowos} like Mac OS X) AppleWebKit/534.46.0 (KHTML, like Gecko) CriOS/19.0.1084.60 Mobile/9B206 Safari/7534.48.3";
         headers.Add("User-Agent", userAgent);
