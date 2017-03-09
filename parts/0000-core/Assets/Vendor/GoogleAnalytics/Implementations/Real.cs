@@ -2,9 +2,6 @@
 using System.Text;
 using com.tinylabproductions.TLPLib.Extensions;
 using UnityEngine;
-#if UNITY_IOS
-using com.tinylabproductions.TLPLib.Concurrent;
-#endif
 
 namespace com.tinylabproductions.GoogleAnalytics.Implementations {
   public class GAClientImpl : IGAClient {
@@ -155,14 +152,7 @@ namespace com.tinylabproductions.GoogleAnalytics.Implementations {
           "Posting to Google Analytics: " + Encoding.UTF8.GetString(wwwForm.data)
         );
 
-#if !UNITY_IOS
-        // ReSharper disable once ObjectCreationAsStatement
-        new WWW(url, wwwForm.data, headers);
-#else
-        // This is used because of il2cpp bug which crashes the runtime
-        // if several wwws are running at the same time.
-        ASync.oneAtATimeWWW(() => new WWW(url, wwwForm.data, headers));
-#endif
+        new WWW(url, wwwForm.data, headers).forSideEffects();
       }
     }
   }
