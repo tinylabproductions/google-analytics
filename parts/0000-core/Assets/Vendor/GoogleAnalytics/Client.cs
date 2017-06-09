@@ -43,8 +43,8 @@ namespace com.tinylabproductions.GoogleAnalytics {
       $"action: {action}, " +
       $"label: {label}, " +
       $"value: {value}, " +
-      $"metricValues: {metricValues.asString()}, " +
-      $"dimensionValues: {dimensionValues.asString()}, " +
+      $"metricValues: {metricValues.asDebugString()}, " +
+      $"dimensionValues: {dimensionValues.asDebugString()}, " +
       $"{referrer}" +
       $"]";
   }
@@ -74,8 +74,8 @@ namespace com.tinylabproductions.GoogleAnalytics {
     public override string ToString() { return
         $"{nameof(GAAppView)}[" +
         $"screenName: {screenName}, " +
-        $"metricValues: {metricValues.asString()}, " +
-        $"dimensionValues: {dimensionValues.asString()}, " +
+        $"metricValues: {metricValues.asDebugString()}, " +
+        $"dimensionValues: {dimensionValues.asDebugString()}, " +
         $"{referrer}" +
         $"]"; }
   }
@@ -174,8 +174,8 @@ namespace com.tinylabproductions.GoogleAnalytics {
       $"name: {name}, " +
       $"time: {timeMs}, " +
       $"label: {label}, " +
-      $"metricValues: {metricValues.asString()}, " +
-      $"dimensionValues: {dimensionValues.asString()}, " +
+      $"metricValues: {metricValues.asDebugString()}, " +
+      $"dimensionValues: {dimensionValues.asDebugString()}, " +
       $"{referrer}" +
       $"]";
   }
