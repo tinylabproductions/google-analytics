@@ -1,2 +1,2 @@
 #!/bin/sh
-dirlink Assets/Vendor/GoogleAnalytics
+dirlink Assets/Plugins/Vendor/GoogleAnalytics
