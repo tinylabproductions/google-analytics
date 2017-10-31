@@ -13,7 +13,7 @@ namespace com.tinylabproductions.GoogleAnalytics.Implementations {
     }
 
     public GAClientLoggingImpl(Log.Level level = DEFAULT_LEVEL) 
-      : this(Log.defaultLogger, level) {}
+      : this(Log.@default, level) {}
 
     public void Event(GAEvent data) { if (logger.willLog(level)) log(data.ToString()); }
     public void AppView(GAAppView data) { if (logger.willLog(level)) log(data.ToString()); }
