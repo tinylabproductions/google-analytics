@@ -37,7 +37,7 @@ namespace com.tinylabproductions.GoogleAnalytics {
     public GAEvent withReferrer(Option<GAReferrer> referrer) =>
       new GAEvent(category, action, label, value, metricValues, dimensionValues, referrer);
 
-    public override string ToString() => 
+    public override string ToString() =>
       $"{nameof(GAEvent)}[" +
       $"category: {category}, " +
       $"action: {action}, " +
@@ -168,7 +168,7 @@ namespace com.tinylabproductions.GoogleAnalytics {
       category, name, timeMs, label, metricValues, dimensionValues, referrer
     );
 
-    public override string ToString() => 
+    public override string ToString() =>
       $"{nameof(GATiming)}[" +
       $"category: {category}, " +
       $"name: {name}, " +
@@ -183,22 +183,22 @@ namespace com.tinylabproductions.GoogleAnalytics {
   public struct GAReferrer {
     public readonly string raw;
     /**
-     * Specifies which referral source brought traffic to a website. This value is 
+     * Specifies which referral source brought traffic to a website. This value is
      * also used to compute the traffic source. The format of this value is a URL.
      **/
     public readonly Option<string> documentReferrer;
-    public readonly Option<string> 
-      campaignName, campaignSource, campaignMedium, campaignKeyword, 
+    public readonly Option<string>
+      campaignName, campaignSource, campaignMedium, campaignKeyword,
       campaignContent, campaignId;
 
     public GAReferrer(
       string raw,
-      Option<string> documentReferrer = default(Option<string>), 
-      Option<string> campaignName = default(Option<string>), 
-      Option<string> campaignSource = default(Option<string>), 
-      Option<string> campaignMedium = default(Option<string>), 
-      Option<string> campaignKeyword = default(Option<string>), 
-      Option<string> campaignContent = default(Option<string>), 
+      Option<string> documentReferrer = default(Option<string>),
+      Option<string> campaignName = default(Option<string>),
+      Option<string> campaignSource = default(Option<string>),
+      Option<string> campaignMedium = default(Option<string>),
+      Option<string> campaignKeyword = default(Option<string>),
+      Option<string> campaignContent = default(Option<string>),
       Option<string> campaignId = default(Option<string>)
     ) {
       this.raw = raw;
