@@ -9,6 +9,7 @@ namespace com.tinylabproductions.GoogleAnalytics.Implementations {
     readonly string clientId, appName, appVersion, url, screenResolution;
     readonly Dictionary<string,string> headers;
     string screenName = "Not Set";
+    public bool anonymizeIP;
 
     /**
      * [param trackingId] Tracking ID / Web property / Property ID.
@@ -17,7 +18,7 @@ namespace com.tinylabproductions.GoogleAnalytics.Implementations {
      **/
     public GAClientImpl(
       ICollection<string> trackingIds, string clientId,
-      string appName, string appVersion,
+      string appName, string appVersion, bool anonymizeIP,
       string url = GAClient.DEFAULT_URL
     ) {
       appName.checkLength("appName", 100);
@@ -28,6 +29,7 @@ namespace com.tinylabproductions.GoogleAnalytics.Implementations {
       this.appName = appName;
       this.appVersion = appVersion;
       this.url = url;
+      this.anonymizeIP = anonymizeIP;
 
       headers = new Dictionary<string, string>();
       screenResolution = $"{Screen.width}x{Screen.height}";
@@ -139,6 +141,10 @@ namespace com.tinylabproductions.GoogleAnalytics.Implementations {
         {"sr", screenResolution}
       };
       f.add("cd", screenName, 2048);
+      // When present, the IP address of the sender will be anonymized.
+      // For example, the IP will be anonymized if any of the following parameters are present in the payload:
+      // &aip=, &aip=0, or &aip=1
+      if (anonymizeIP) f.add("aip", "1");
       return f;
     }
 
